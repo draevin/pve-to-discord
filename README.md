@@ -22,4 +22,17 @@ Content-Type: application/json
 token: 70043953045676504/5E8qbiWN4o-sdagsdgfgdfgdfhfghjrrety_adadsdadsadasdasds-izpAdw
 ```
 
+You will need to compile it on your prefered os with (You will need to install go aswell):
+```
+git clone https://github.com/MrPvTDagger/pve-to-discord.git
+go build -o /pvetodiscord
+mkdir logs/
+./pvetodiscord
+```
+or run it in a docker container
+```
+git clone https://github.com/MrPvTDagger/pve-to-discord.git
+docker build . -t pvetodiscord:latest
+docker run -p -d 8880:80 pvetodiscord:latest
+```
 ![example-in-discord](https://cdn.oki.cx/files/fbxant9qwdovnem2n1oe527d5.png)
