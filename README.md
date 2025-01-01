@@ -22,7 +22,7 @@ Content-Type: application/json
 token: 70043953045676504/5E8qbiWN4o-sdagsdgfgdfgdfhfghjrrety_adadsdadsadasdasds-izpAdw
 ```
 
-You will need to compile it on your prefered os with (You will need to install go aswell):
+You will need to compile it on your prefered os (You will need to install go aswell):
 ```
 git clone https://github.com/MrPvTDagger/pve-to-discord.git
 go build -o /pvetodiscord
