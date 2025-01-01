@@ -20,3 +20,6 @@ Content-Type: application/json
 
 //Secrets:
 token: 70043953045676504/5E8qbiWN4o-sdagsdgfgdfgdfhfghjrrety_adadsdadsadasdasds-izpAdw
+```
+
+![example-in-discord](https://cdn.oki.cx/files/fbxant9qwdovnem2n1oe527d5.png)
