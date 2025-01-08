@@ -33,6 +33,6 @@ or run it in a docker container
 ```
 git clone https://github.com/MrPvTDagger/pve-to-discord.git
 docker build . -t pvetodiscord:latest
-docker run -p -d 8880:80 pvetodiscord:latest
+docker run -d -p 8880:80 --restart always pvetodiscord:latest
 ```
 ![example-in-discord](https://cdn.oki.cx/files/fbxant9qwdovnem2n1oe527d5.png)
