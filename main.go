@@ -25,7 +25,7 @@ func main() {
 
 	echo.POST("/webhook", webhook)
 
-	echo.Logger.Info(echo.Start(":8088"))
+	echo.Logger.Info(echo.Start(":80"))
 
 }
 
