@@ -35,4 +35,4 @@ git clone https://github.com/MrPvTDagger/pve-to-discord.git
 docker build . -t pvetodiscord:latest
 docker run -d -p 8880:80 --restart always pvetodiscord:latest
 ```
-![example-in-discord](https://cdn.oki.cx/files/fbxant9qwdovnem2n1oe527d5.png)
+![example-in-discord](https://cdn.oki.cx/files/r3p4gxa1y7kg4gei5wvhq2p03.png)

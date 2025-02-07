@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"io"
 	"log"
 	"net/http"
@@ -24,7 +25,7 @@ func main() {
 
 	echo.POST("/webhook", webhook)
 
-	echo.Logger.Info(echo.Start(":80"))
+	echo.Logger.Info(echo.Start(":8088"))
 
 }
 
@@ -72,9 +73,8 @@ func webhook(ctx echo.Context) error {
 
 	log.Printf("Log file %s written to disk", fileName)
 
-	description := fmt.Sprintf("You can find the detailed logs [here](%s%s) ", webhookrequest.UrlLogAccessable, fileName)
-
 	var embedColor string
+	var description string
 
 	switch webhookrequest.Serverity {
 	case "info":
@@ -87,6 +87,18 @@ func webhook(ctx echo.Context) error {
 		embedColor = "15548997"
 	default:
 		embedColor = "9807270"
+	}
+
+	if len(webhookrequest.MessageContent) < 4096 {
+		description = fmt.Sprintf("```shell %s ```", webhookrequest.MessageContent)
+	} else {
+		summary := summarizeMessageContent(webhookrequest.MessageContent)
+
+		if len(summary) > 1 {
+			description = fmt.Sprintf("```%s``` You can find the detailed log [here](%s%s)", summary, webhookrequest.UrlLogAccessable, fileName )
+		} else {
+			description = fmt.Sprintf("You can find the detailed log [here](%s%s) ", webhookrequest.UrlLogAccessable, fileName)
+		}
 	}
 
 	embed := Embed{
@@ -133,4 +145,87 @@ func exportLog(webhookRequest *webhookRequest) (string, error) {
 	err := os.WriteFile(fmt.Sprintf("logs/%s", filename), []byte(webhookRequest.MessageContent), 0644)
 
 	return filename, err
+}
+
+
+func summarizeMessageContent(data string) string {
+	lines := strings.Split(data, "\n")
+
+	var cleanedLines []string
+	var totalRunningTime string
+	var totalSize string
+
+	// Process each line to split and clean the necessary data
+	for _, line := range lines {
+		// Trim any leading/trailing spaces
+		line = strings.TrimSpace(line)
+
+		// Stop processing if "Logs" section is encountered
+		if strings.HasPrefix(line, "Logs") {
+			break
+		}
+
+		// Skip empty lines
+		if len(line) == 0 {
+			continue
+		}
+
+		// Skip "Details" header
+		if line == "Details" {
+			continue
+		}
+
+		// Skip Headers
+		if strings.Contains(line, "VMID") {
+			continue
+		}
+
+		// Capture "Total running time" and "Total size"
+		if strings.HasPrefix(line, "Total running time:") {
+			totalRunningTime = line
+			continue
+		}
+		if strings.HasPrefix(line, "Total size:") {
+			totalSize = line
+			continue
+		}
+
+		// Split the line by spaces, expecting at least 4 columns
+		columns := strings.Fields(line)
+
+		// Check if there are enough columns (we expect at least 4)
+		if len(columns) < 4 {
+			continue // Skip rows that don't have enough data
+		}
+
+		// Remove the "Size" and "Filename" columns by trimming the slice
+		columns = columns[:4]
+
+		// Build the cleaned line and align it properly
+		cleanedLine := fmt.Sprintf("%-5s %-25s %-8s %-10s",
+			columns[0], columns[1], columns[2], columns[3])
+
+		// Add the cleaned line to the result
+		cleanedLines = append(cleanedLines, cleanedLine)
+	}
+
+	// Add a blank line before the totals
+	cleanedLines = append(cleanedLines, "")
+
+	// Append the "Total running time" and "Total size" directly
+	if totalRunningTime != "" {
+		cleanedLines = append(cleanedLines, totalRunningTime)
+	}
+	if totalSize != "" {
+		cleanedLines = append(cleanedLines, totalSize)
+	}
+
+	// Format the header correctly (only once)
+	header := fmt.Sprintf("%-5s %-25s %-8s %-10s", "VMID", "Name", "Status", "Time")
+
+	// Combine everything into one string
+	finalOutput := strings.Join(append([]string{header}, cleanedLines...), "\n")
+
+	// Return the final formatted string
+	return finalOutput
 }
