@@ -1,15 +1,19 @@
-FROM golang:bookworm
-
-EXPOSE 80
+FROM golang:alpine3.21 AS builder
 
 WORKDIR /app
 
 COPY . /app
 
-RUN mkdir logs/
-
 RUN go mod download
 
-RUN go build -o /pvetodiscord
+RUN go build -o pvetodiscord
 
-CMD [ "/pvetodiscord" ]
+FROM alpine:latest
+
+EXPOSE 80
+
+WORKDIR /app
+
+COPY --from=builder /app/pvetodiscord .
+
+CMD [ "./pvetodiscord" ]
