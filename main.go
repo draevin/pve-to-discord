@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -16,6 +16,7 @@ import (
 )
 
 func main() {
+	// Setup http server
 	echo := echo.New()
 
 	echo.Use(middleware.Logger())
@@ -49,6 +50,8 @@ type Embed struct {
 }
 
 func webhook(ctx echo.Context) error {
+
+	// Decode JSON from request
 	jsonBody := make(map[string]interface{})
 	err := json.NewDecoder(ctx.Request().Body).Decode(&jsonBody)
 	if err != nil {
@@ -64,18 +67,10 @@ func webhook(ctx echo.Context) error {
 		Title:            jsonBody["messageTitle"].(string),
 	}
 
-	// Exportlog
-	fileName, err := exportLog(&webhookrequest)
-	if err != nil {
-		log.Printf("Failed to write log file: %s", err)
-		ctx.String(http.StatusBadRequest, err.Error())
-	}
-
-	log.Printf("Log file %s written to disk", fileName)
-
 	var embedColor string
 	var description string
 
+	// Embed colour based on Serverity
 	switch webhookrequest.Serverity {
 	case "info":
 		embedColor = "2123412"
@@ -89,18 +84,28 @@ func webhook(ctx echo.Context) error {
 		embedColor = "9807270"
 	}
 
-	if len(webhookrequest.MessageContent) < 4096 {
-		description = fmt.Sprintf("```shell %s ```", webhookrequest.MessageContent)
+	// Check if Message Content can fit in the embed without needing to summerize it
+	if len(webhookrequest.MessageContent) < 4096 && !strings.Contains(webhookrequest.Title, "vzdump") {
+		description = fmt.Sprintf("```%s```", webhookrequest.MessageContent)
 	} else {
 		summary := summarizeMessageContent(webhookrequest.MessageContent)
 
+		// Save file to disk
+		fileName, err := saveLogToDisk(&webhookrequest)
+		if err != nil {
+			log.Printf("Failed to write log file: %s", err)
+			ctx.String(http.StatusBadRequest, err.Error())
+		}
+
+		// Add Summary to embed discription
 		if len(summary) > 1 {
-			description = fmt.Sprintf("```%s``` You can find the detailed log [here](%s%s)", summary, webhookrequest.UrlLogAccessable, fileName )
+			description = fmt.Sprintf("```%s``` You can find the detailed log [here](%s%s)", summary, webhookrequest.UrlLogAccessable, fileName)
 		} else {
 			description = fmt.Sprintf("You can find the detailed log [here](%s%s) ", webhookrequest.UrlLogAccessable, fileName)
 		}
 	}
 
+	// Craft Payload
 	embed := Embed{
 		Title:       webhookrequest.Title,
 		Description: description,
@@ -120,11 +125,13 @@ func webhook(ctx echo.Context) error {
 		ctx.String(http.StatusBadRequest, err.Error())
 	}
 
+	// Send payload to discord
 	resp, err := http.Post(webhookrequest.DiscordWebhook, "application/json", payload)
 	if err != nil {
 		log.Printf("Failed to send discord webhook: %s", err)
 	}
 
+	// Check response from discord for errors
 	defer resp.Body.Close()
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -138,15 +145,16 @@ func webhook(ctx echo.Context) error {
 	return ctx.String(http.StatusOK, string(responseBody))
 }
 
-func exportLog(webhookRequest *webhookRequest) (string, error) {
+func saveLogToDisk(webhookRequest *webhookRequest) (string, error) {
 	time := time.Now()
 	filename := fmt.Sprintf("%s.log", time.Format("2006-01-02.15-04-05"))
 
 	err := os.WriteFile(fmt.Sprintf("logs/%s", filename), []byte(webhookRequest.MessageContent), 0644)
 
+	log.Printf("Log file %s written to disk", filename)
+
 	return filename, err
 }
-
 
 func summarizeMessageContent(data string) string {
 	lines := strings.Split(data, "\n")
