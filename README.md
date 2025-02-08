@@ -35,4 +35,18 @@ git clone https://github.com/MrPvTDagger/pve-to-discord.git
 docker build . -t pvetodiscord:latest
 docker run -d -p 8880:80 --restart always pvetodiscord:latest
 ```
+
+or via the prebuilt image:
+```ghcr.io/mrpvtdagger/pve-to-discord:latest```
+
+```
+services:
+ pvetodiscord:
+    image: ghcr.io/mrpvtdagger/pve-to-discord:v1.0.4
+    volumes:
+      - "/path-to-logs/logs:/app/logs"
+    ports:
+      - "8087:80"
+    restart: unless-stopped
+```
 ![example-in-discord](https://cdn.oki.cx/files/r3p4gxa1y7kg4gei5wvhq2p03.png)
