@@ -1,8 +1,7 @@
 name: Docker
 on:
   push:
-    branches: [ "main" ]
-    tags: [ 'v*.*.*' ]
+    branches: [ "dev/ordis" ]
 
 env:
   REGISTRY: ghcr.io

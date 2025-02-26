@@ -33,20 +33,32 @@ func main() {
 type webhookRequest struct {
 	DiscordWebhook   string
 	MessageContent   string
-	UrlLogAccessable string
+	UrlLogAccessible string
 	Severity        string
 	Title            string
 }
 
 type discordWebhook struct {
+	Username string `json:"username"`
 	Content string  `json:"content"`
 	Embeds  []Embed `json:"embeds"`
 }
 
+type Footer struct {
+	Text string `json:"text"`
+}
+
+type Author struct {
+	Name string `json:"name"`
+	IconUrl string `json:"icon_url"`
+}
+
 type Embed struct {
+	Author      Author `json:"author"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Color       string `json:"color"`
+	Footer      Footer `json:"footer"`
 }
 
 func webhook(ctx echo.Context) error {
@@ -62,27 +74,12 @@ func webhook(ctx echo.Context) error {
 	webhookrequest := webhookRequest{
 		DiscordWebhook:   jsonBody["discordWebhook"].(string),
 		MessageContent:   jsonBody["messageContent"].(string),
-		UrlLogAccessable: jsonBody["urlLogAccessable"].(string),
-		Severity:        jsonBody["severity"].(string),
+		UrlLogAccessible: jsonBody["UrlLogAccessible"].(string),
 		Title:            jsonBody["messageTitle"].(string),
 	}
 
-	var embedColor string
+	var embedColor = "15036416"
 	var description string
-
-	// Embed colour based on Severity
-	switch webhookrequest.Severity {
-	case "info":
-		embedColor = "2123412"
-	case "notice":
-		embedColor = "9807270"
-	case "warning":
-		embedColor = "15105570"
-	case "error":
-		embedColor = "15548997"
-	default:
-		embedColor = "9807270"
-	}
 
 	// Check if Message Content can fit in the embed without needing to summerize it
 	if len(webhookrequest.MessageContent) < 4096 && !strings.Contains(webhookrequest.Title, "vzdump") {
@@ -99,17 +96,31 @@ func webhook(ctx echo.Context) error {
 
 		// Add Summary to embed discription
 		if len(summary) > 1 {
-			description = fmt.Sprintf("```%s``` You can find the detailed log [here](%s%s)", summary, webhookrequest.UrlLogAccessable, fileName)
+			description = fmt.Sprintf("```%s``` You can find the detailed log [here](%s%s)", summary, webhookrequest.UrlLogAccessible, fileName)
 		} else {
-			description = fmt.Sprintf("You can find the detailed log [here](%s%s) ", webhookrequest.UrlLogAccessable, fileName)
+			description = fmt.Sprintf("You can find the detailed log [here](%s%s) ", webhookrequest.UrlLogAccessible, fileName)
 		}
 	}
 
 	// Craft Payload
+	iconUrl := "https://pbs.proxmox.com/docs/_static/favicon.ico"
+	authorName := "Proxmox VE"
+	author := Author{
+		Name: authorName,
+		IconUrl: iconUrl
+	}
+	
+	footerText := "Ordis via pvetodiscord"
+	footer := Footer{
+		Text: footerText
+	}
+
 	embed := Embed{
+		Author:      author,
 		Title:       webhookrequest.Title,
 		Description: description,
 		Color:       embedColor,
+		Footer:      footer
 	}
 
 	discordPayload := discordWebhook{

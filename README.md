@@ -1,6 +1,6 @@
 # Proxmox Webhook Notification to Discord
 
-Due to the character limit of discord webhooks (2000 characters) you can't send full backup logs into discord so this program will act as a middle man and store the log file and make it accessble via a link that will be posted in the discord instead of the wall of text being posted in the channel directly.
+Due to the character limit of discord webhooks (2000 characters) you can't send full backup logs into discord so this program will act as a middle man and store the log file and make it accessible via a link that will be posted in the discord instead of the wall of text being posted in the channel directly.
 
 ```
 // Method/URL:
@@ -14,15 +14,14 @@ Content-Type: application/json
     "discordWebhook": "https://discord.com/api/webhooks/{{ secrets.token }}",
     "messageContent": "{{ escape message }}",
     "messageTitle": "{{ title }}",
-    "urlLogAccessable": "http://url-to-webserver/logs/",
-    "severity": "{{ severity }}"
+    "urlLogAccessible": "http://url-to-webserver/logs/"
 }
 
 //Secrets:
 token: 70043953045676504/5E8qbiWN4o-sdagsdgfgdfgdfhfghjrrety_adadsdadsadasdasds-izpAdw
 ```
 
-You will need to compile it on your prefered os (You will need to install go aswell):
+You will need to compile it on your preferred os (You will need to install go as well):
 ```
 git clone https://github.com/MrPvTDagger/pve-to-discord.git
 go build -o /pvetodiscord
