@@ -74,7 +74,7 @@ func webhook(ctx echo.Context) error {
 	webhookrequest := webhookRequest{
 		DiscordWebhook:   jsonBody["discordWebhook"].(string),
 		MessageContent:   jsonBody["messageContent"].(string),
-		UrlLogAccessible: jsonBody["UrlLogAccessible"].(string),
+		UrlLogAccessible: jsonBody["urlLogAccessible"].(string),
 		Title:            jsonBody["messageTitle"].(string),
 	}
 
