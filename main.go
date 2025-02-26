@@ -124,6 +124,7 @@ func webhook(ctx echo.Context) error {
 	}
 
 	discordPayload := discordWebhook{
+		Username: "Ordis"
 		Content: "",
 		Embeds:  []Embed{embed},
 	}
