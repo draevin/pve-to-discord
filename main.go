@@ -107,12 +107,12 @@ func webhook(ctx echo.Context) error {
 	authorName := "Proxmox VE"
 	author := Author{
 		Name: authorName,
-		IconUrl: iconUrl
+		IconUrl: iconUrl,
 	}
 	
 	footerText := "Ordis via pvetodiscord"
 	footer := Footer{
-		Text: footerText
+		Text: footerText,
 	}
 
 	embed := Embed{
@@ -120,7 +120,7 @@ func webhook(ctx echo.Context) error {
 		Title:       webhookrequest.Title,
 		Description: description,
 		Color:       embedColor,
-		Footer:      footer
+		Footer:      footer,
 	}
 
 	discordPayload := discordWebhook{
