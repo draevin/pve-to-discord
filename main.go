@@ -103,14 +103,14 @@ func webhook(ctx echo.Context) error {
 	}
 
 	// Craft Payload
-	iconUrl := "https://pbs.proxmox.com/docs/_static/favicon.ico"
-	authorName := "Proxmox VE"
+	var iconUrl = "https://pbs.proxmox.com/docs/_static/favicon.ico"
+	var authorName = "Proxmox VE"
 	author := Author{
 		Name: authorName,
 		IconUrl: iconUrl,
 	}
 	
-	footerText := "Ordis via pvetodiscord"
+	var footerText = "Ordis via pvetodiscord"
 	footer := Footer{
 		Text: footerText,
 	}
