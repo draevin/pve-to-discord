@@ -253,7 +253,7 @@ func summarizeMessageContent(data string) string {
 }
 
 func count(ctx echo.Context) error {
-	logs, err := os.ReadDir("/logs")
+	logs, err := os.ReadDir("logs")
 
 	log.Printf("Retrieved %d files for status check", len(logs))
 
