@@ -26,6 +26,8 @@ func main() {
 
 	echo.POST("/webhook", webhook)
 
+	echo.GET("/count", count)
+
 	echo.Logger.Info(echo.Start(":80"))
 
 }
@@ -34,14 +36,14 @@ type webhookRequest struct {
 	DiscordWebhook   string
 	MessageContent   string
 	UrlLogAccessible string
-	Severity        string
+	Severity         string
 	Title            string
 }
 
 type discordWebhook struct {
-	Username string `json:"username"`
-	Content string  `json:"content"`
-	Embeds  []Embed `json:"embeds"`
+	Username string  `json:"username"`
+	Content  string  `json:"content"`
+	Embeds   []Embed `json:"embeds"`
 }
 
 type Footer struct {
@@ -49,7 +51,7 @@ type Footer struct {
 }
 
 type Author struct {
-	Name string `json:"name"`
+	Name    string `json:"name"`
 	IconUrl string `json:"icon_url"`
 }
 
@@ -106,10 +108,10 @@ func webhook(ctx echo.Context) error {
 	var iconUrl = "https://pbs.proxmox.com/docs/_static/favicon.ico"
 	var authorName = "Proxmox VE"
 	author := Author{
-		Name: authorName,
+		Name:    authorName,
 		IconUrl: iconUrl,
 	}
-	
+
 	var footerText = "Ordis via pvetodiscord"
 	footer := Footer{
 		Text: footerText,
@@ -125,8 +127,8 @@ func webhook(ctx echo.Context) error {
 
 	discordPayload := discordWebhook{
 		Username: "Ordis",
-		Content: "",
-		Embeds:  []Embed{embed},
+		Content:  "",
+		Embeds:   []Embed{embed},
 	}
 
 	payload := new(bytes.Buffer)
@@ -248,4 +250,16 @@ func summarizeMessageContent(data string) string {
 
 	// Return the final formatted string
 	return finalOutput
+}
+
+func count(ctx echo.Context) error {
+	logs, err := os.ReadDir("/logs")
+
+	log.Printf("Retrieved %d files for status check", len(logs))
+
+	if err != nil {
+		return ctx.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.String(http.StatusOK, fmt.Sprintf("logs: %d", len(logs)))
 }
